@@ -22,7 +22,7 @@ class VHostFuzzer:
         print_status(f"Starting vhost fuzz on {url} — Host: {host_header}", level="info")
 
         af = AutoFilter(self.runner)
-        af.probe(wordlist, url)
+        af.probe(wordlist, url, extra_args=["-H", f"Host: {host_header}"])
 
         filter_flags = af.get_filter_flags()
         if filter_flags:

@@ -19,9 +19,9 @@ class AutoFilter:
         tmp.close()
         return tmp.name
 
-    def probe(self, wordlist: str, url: str) -> None:
+    def probe(self, wordlist: str, url: str, extra_args: list[str] | None = None) -> None:
         probe_wordlist = self._make_probe_wordlist(wordlist)
-        cmd = ["-u", url, "-w", probe_wordlist]
+        cmd = ["-u", url, "-w", probe_wordlist] + (extra_args or [])
 
         tmp_path = self.runner.run(cmd)
         os.unlink(probe_wordlist)
