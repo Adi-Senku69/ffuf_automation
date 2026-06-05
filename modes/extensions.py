@@ -1,5 +1,6 @@
 from core.runner import FfufRunner
 from core.parser import parse_output, FuzzResult
+from core.utils import count_wordlist
 from ui.display import print_status, print_results
 
 DEFAULT_WORDLIST = "/usr/share/seclists/Discovery/Web-Content/web-extensions.txt"
@@ -13,7 +14,8 @@ class ExtensionFuzzer:
         print_status(f"Starting extension fuzz on {url}", level="info")
 
         args = ["-u", f"{url}/indexFUZZ", "-w", wordlist]
-        json_path = self.runner.run(args)
+        count = count_wordlist(wordlist)
+        json_path = self.runner.run(args, description=f"Extension fuzzing — {count} words")
 
         results = parse_output(json_path)
         print_results(results, mode="extensions")

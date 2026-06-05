@@ -1,6 +1,7 @@
 from core.runner import FfufRunner
 from core.filter import AutoFilter
 from core.parser import parse_output, FuzzResult
+from core.utils import count_wordlist
 from ui.display import print_status, print_results
 
 DEFAULT_WORDLIST = "/usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt"
@@ -21,7 +22,8 @@ class ParamFuzzer:
             print_status(f"Filtering response size: {af.filter_size}", level="info")
 
         args = ["-u", f"{url}?FUZZ=value", "-w", wordlist] + filter_flags
-        json_path = self.runner.run(args)
+        count = count_wordlist(wordlist)
+        json_path = self.runner.run(args, description=f"GET param fuzzing — {count} words")
 
         results = parse_output(json_path)
         print_results(results, mode="GET params")
@@ -44,7 +46,8 @@ class ParamFuzzer:
             "-H", "Content-Type: application/x-www-form-urlencoded",
             "-w", wordlist,
         ] + filter_flags
-        json_path = self.runner.run(args)
+        count = count_wordlist(wordlist)
+        json_path = self.runner.run(args, description=f"POST param fuzzing — {count} words")
 
         results = parse_output(json_path)
         print_results(results, mode="POST params")

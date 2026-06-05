@@ -1,3 +1,4 @@
+import time
 import tempfile
 import subprocess
 from rich.console import Console
@@ -10,6 +11,7 @@ class FfufRunner:
         self.threads = threads
         self.proxy = proxy
         self.delay = delay
+        self.parallel_mode = False
 
     def _build_base_args(self) -> list[str]:
         base_command = ["ffuf", "-t", str(self.threads)]
@@ -19,9 +21,15 @@ class FfufRunner:
             base_command += ["-p", str(self.delay)]
         return base_command
 
-    def run(self, args: list[str]) -> str:
+    def run(self, args: list[str], description: str = "Fuzzing...") -> str:
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
             cmd = self._build_base_args() + ["-of", "json", "-o", tmp.name] + args
-            with console.status("[cyan]Fuzzing...[/cyan]"):
-                proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            start = time.time()
+            if self.parallel_mode:
+                console.log(f"[cyan]▶ {description}[/cyan]")
+                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
+                with console.status(f"[cyan]{description}[/cyan]"):
+                    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            console.log(f"[green]✓ {description} — done in {time.time() - start:.1f}s[/green]")
             return tmp.name

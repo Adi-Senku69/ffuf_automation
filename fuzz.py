@@ -21,6 +21,7 @@ def build_runner(args: argparse.Namespace) -> FfufRunner:
 
 def run_auto(runner: FfufRunner, args: argparse.Namespace) -> None:
     tasks = {}
+    runner.parallel_mode = True
     with ThreadPoolExecutor() as executor:
         wl = args.wordlist
         tasks["dir"] = executor.submit(
@@ -28,8 +29,10 @@ def run_auto(runner: FfufRunner, args: argparse.Namespace) -> None:
         )
         if args.domain:
             tasks["vhost"] = executor.submit(
-                VHostFuzzer(runner).run, args.target, args.domain, *([wl] if wl else [])
+                VHostFuzzer(runner).run, args.target, args.domain,
+                *([wl] if wl else []), args.host_pattern
             )
+    runner.parallel_mode = False
 
     dir_results = tasks["dir"].result()
 
@@ -52,7 +55,11 @@ def run_single(runner: FfufRunner, args: argparse.Namespace) -> None:
         if not args.domain:
             print_status("--domain is required for vhost mode", level="warn")
             return
-        VHostFuzzer(runner).run(args.target, args.domain, *([wordlist] if wordlist else []))
+        VHostFuzzer(runner).run(
+            args.target, args.domain,
+            *([wordlist] if wordlist else []),
+            args.host_pattern
+        )
 
     elif args.mode == "params-get":
         ParamFuzzer(runner).run_get(args.target, *([wordlist] if wordlist else []))
@@ -74,6 +81,7 @@ def main() -> None:
     parser.add_argument("-t", "--threads", type=int, default=40, help="Threads (default: 40)")
     parser.add_argument("-x", "--proxy", help="Proxy URL (e.g. http://127.0.0.1:8080)")
     parser.add_argument("-p", "--delay", type=float, help="Delay between requests (e.g. 0.1)")
+    parser.add_argument("--host-pattern", help="Custom Host header pattern for vhost (e.g. preprod-FUZZ.trick.htb)")
 
     args = parser.parse_args()
 
