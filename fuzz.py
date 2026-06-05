@@ -22,7 +22,8 @@ def build_runner(args: argparse.Namespace) -> FfufRunner:
 def run_auto(runner: FfufRunner, args: argparse.Namespace) -> None:
     tasks = {}
     runner.parallel_mode = True
-    with ThreadPoolExecutor() as executor:
+    executor = ThreadPoolExecutor()
+    try:
         wl = args.wordlist
         tasks["dir"] = executor.submit(
             DirectoryFuzzer(runner).run, args.target, *([wl] if wl else [])
@@ -33,7 +34,13 @@ def run_auto(runner: FfufRunner, args: argparse.Namespace) -> None:
                 *([wl] if wl else []),
                 **{"host_pattern": args.host_pattern}
             )
-    runner.parallel_mode = False
+        executor.shutdown(wait=True)
+    except KeyboardInterrupt:
+        executor.shutdown(wait=False)
+        print_status("Scan interrupted", level="warn")
+        return
+    finally:
+        runner.parallel_mode = False
 
     dir_results = tasks["dir"].result()
 

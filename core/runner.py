@@ -14,7 +14,7 @@ class FfufRunner:
         self.parallel_mode = False
 
     def _build_base_args(self) -> list[str]:
-        base_command = ["ffuf", "-t", str(self.threads)]
+        base_command = ["ffuf", "-t", str(self.threads), "-ic"]
         if self.proxy is not None:
             base_command += ["-x", self.proxy]
         if self.delay is not None:
