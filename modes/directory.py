@@ -3,7 +3,7 @@ from core.filter import AutoFilter
 from core.parser import parse_output, FuzzResult
 from ui.display import print_status, print_results
 
-DEFAULT_WORDLIST = "/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt"
+DEFAULT_WORDLIST = "/usr/share/seclists/Discovery/Web-Content/DirBuster-2007_directory-list-2.3-small.txt"
 
 
 class DirectoryFuzzer:
@@ -18,7 +18,8 @@ class DirectoryFuzzer:
 
         filter_flags = af.get_filter_flags()
         if filter_flags:
-            print_status(f"Filtering response size: {af.filter_size}", level="info")
+            print_status(
+                f"Filtering response size: {af.filter_size}", level="info")
 
         args = ["-u", f"{url}/FUZZ", "-w", wordlist] + filter_flags
         json_path = self.runner.run(args)

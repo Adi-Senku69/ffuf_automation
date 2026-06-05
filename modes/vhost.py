@@ -10,7 +10,9 @@ class VHostFuzzer:
     def __init__(self, runner: FfufRunner):
         self.runner = runner
 
-    def run(self, url: str, domain: str, wordlist: str = DEFAULT_WORDLIST) -> list[FuzzResult]:
+    def run(
+        self, url: str, domain: str, wordlist: str = DEFAULT_WORDLIST
+    ) -> list[FuzzResult]:
         print_status(f"Starting vhost fuzz on {url} for domain {domain}", level="info")
 
         af = AutoFilter(self.runner)
