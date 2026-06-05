@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from core.runner import FfufRunner
 from modes.directory import DirectoryFuzzer
 from modes.extensions import ExtensionFuzzer
@@ -19,10 +20,18 @@ def build_runner(args: argparse.Namespace) -> FfufRunner:
 
 
 def run_auto(runner: FfufRunner, args: argparse.Namespace) -> None:
-    dir_results = DirectoryFuzzer(runner).run(args.target, args.wordlist) if args.wordlist else DirectoryFuzzer(runner).run(args.target)
+    tasks = {}
+    with ThreadPoolExecutor() as executor:
+        wl = args.wordlist
+        tasks["dir"] = executor.submit(
+            DirectoryFuzzer(runner).run, args.target, *([wl] if wl else [])
+        )
+        if args.domain:
+            tasks["vhost"] = executor.submit(
+                VHostFuzzer(runner).run, args.target, args.domain, *([wl] if wl else [])
+            )
 
-    if args.domain:
-        VHostFuzzer(runner).run(args.target, args.domain)
+    dir_results = tasks["dir"].result()
 
     php_pages = [r.url for r in dir_results if r.url.endswith(".php")]
     for page in php_pages:
