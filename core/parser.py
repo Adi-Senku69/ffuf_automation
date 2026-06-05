@@ -9,6 +9,7 @@ class FuzzResult:
     words: int
     size: int
     lines: int
+    fuzz_value: str = ""
 
     @classmethod
     def from_dict(cls, d: dict) -> "FuzzResult":
@@ -18,6 +19,7 @@ class FuzzResult:
             words=d["words"],
             size=d["length"],
             lines=d["lines"],
+            fuzz_value=d.get("input", {}).get("FUZZ", ""),
         )
 
 
