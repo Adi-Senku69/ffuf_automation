@@ -33,5 +33,8 @@ class VHostFuzzer:
         json_path = self.runner.run(args, description=f"VHost fuzzing — {count} words")
 
         results = parse_output(json_path)
+        for r in results:
+            if r.fuzz_value:
+                r.fuzz_value = host_header.replace("FUZZ", r.fuzz_value)
         print_results(results, mode="vhost")
         return results
