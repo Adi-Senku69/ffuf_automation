@@ -30,7 +30,8 @@ def run_auto(runner: FfufRunner, args: argparse.Namespace) -> None:
         if args.domain:
             tasks["vhost"] = executor.submit(
                 VHostFuzzer(runner).run, args.target, args.domain,
-                *([wl] if wl else []), args.host_pattern
+                *([wl] if wl else []),
+                **{"host_pattern": args.host_pattern}
             )
     runner.parallel_mode = False
 
@@ -58,7 +59,7 @@ def run_single(runner: FfufRunner, args: argparse.Namespace) -> None:
         VHostFuzzer(runner).run(
             args.target, args.domain,
             *([wordlist] if wordlist else []),
-            args.host_pattern
+            host_pattern=args.host_pattern
         )
 
     elif args.mode == "params-get":
